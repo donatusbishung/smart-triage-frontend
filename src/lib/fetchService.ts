@@ -132,8 +132,8 @@ export function apiDelete<T>(
 }
 
 /**
- * Helper function to get auth token
- * Adjust based on your auth storage implementation
+ * Helper function to get auth token.
+ * Adjust based on your auth storage implementation.
  */
 export function getAuthToken(): string | null {
   if (typeof window === "undefined") return null;
