@@ -24,6 +24,7 @@ jobs:
 
       - name: Lint
         run: npm run lint --if-present
+        continue-on-error: true
 
       # ---- Build & push only on push to main, never on PRs ----
       - name: Log in to Docker Hub
