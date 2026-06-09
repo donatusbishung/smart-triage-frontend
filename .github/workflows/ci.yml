@@ -44,6 +44,8 @@ jobs:
         with:
           context: .
           push: true
+          build-args: |
+            NEXT_PUBLIC_API_URL=
           tags: |
             techcrushgrp14/frontend:latest
             techcrushgrp14/frontend:${{ github.sha }}
