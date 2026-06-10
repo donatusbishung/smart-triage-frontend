@@ -98,7 +98,7 @@ export default function DashboardPage() {
         return;
       }
 
-      const data = await apiGet<{ tickets: any[], totalPages: number, total: number }>(`/api/tickets?page=${page}&limit=10`);
+      const data = await apiGet<{ tickets: any[], totalPages: number, total: number }>(`/tickets?page=${page}&limit=10`);
       
       const mappedTickets = data.tickets.map((t: any) => ({
         ...t,
@@ -137,7 +137,7 @@ export default function DashboardPage() {
       );
       
       try {
-        await apiPatch(`/api/tickets/${mongoId}`, { status: newStatus });
+        await apiPatch(`/tickets/${mongoId}`, { status: newStatus });
         
         toast.success(`Ticket ${ticketId} updated`, {
           description: `Status changed to ${STATUS_LABELS[newStatus]}`,
