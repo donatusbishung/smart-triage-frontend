@@ -1,43 +1,28 @@
-# syntax=docker/dockerfile:1
+# Build stage
+FROM node:20-alpine AS build
 
-# ---- Stage 1: deps ----
-# Install dependencies only when needed, cached separately from source.
-FROM node:20-alpine AS deps
 WORKDIR /app
+
 COPY package*.json ./
 RUN npm ci
 
-# ---- Stage 2: build ----
-# Build the Next.js app. Requires `output: 'standalone'` in next.config.js.
-FROM node:20-alpine AS builder
-WORKDIR /app
-COPY --from=deps /app/node_modules ./node_modules
 COPY . .
-ARG NEXT_PUBLIC_API_URL=""
-ENV NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
+
+ARG NEXT_PUBLIC_API_URL=/api
+ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
+
+
 RUN npm run build
 
-# ---- Stage 3: runtime ----
-# Minimal production image running the standalone server as a non-root user.
-FROM node:20-alpine AS runner
-WORKDIR /app
 
-ENV NODE_ENV=production
-# Disable Next.js telemetry in the container
-ENV NEXT_TELEMETRY_DISABLED=1
+# Production stage
+FROM nginx:alpine
 
-# Create a non-root user to run the app
-RUN addgroup -S app && adduser -S app -G app
+RUN rm -rf /usr/share/nginx/html/*
 
-# Copy the standalone output, static assets, and public files
-COPY --from=builder /app/public ./public
-COPY --from=builder /app/.next/standalone ./
-COPY --from=builder /app/.next/static ./.next/static
+COPY --from=build /app/out /usr/share/nginx/html
+COPY nginx.conf /etc/nginx/conf.d/default.conf
 
-USER app
+EXPOSE 80
 
-EXPOSE 3000
-ENV PORT=3000
-ENV HOSTNAME=0.0.0.0
-
-CMD ["node", "server.js"]
+CMD ["nginx", "-g", "daemon off;"]

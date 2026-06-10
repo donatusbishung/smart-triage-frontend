@@ -34,7 +34,7 @@ export default function Home() {
     };
 
     try {
-      await apiPost<{ ticket: any }>("/api/tickets", data, { skipAuth: true });
+      await apiPost<{ ticket: any }>("/tickets", data, { skipAuth: true });
 
       setSubmitted(true);
       toast.success("Ticket submitted successfully!");
