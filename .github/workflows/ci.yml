@@ -26,7 +26,7 @@ jobs:
         run: npm run lint --if-present
         continue-on-error: true
 
-      # ---- Build & push only on push to main, never on PRs ----
+      # Build & push only on push to main, never on PRs
       - name: Log in to Docker Hub
         if: github.ref == 'refs/heads/master'
         uses: docker/login-action@v3
