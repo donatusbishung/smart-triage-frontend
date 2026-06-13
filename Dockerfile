@@ -1,15 +1,11 @@
-# Stage 1: Install dependencies only when needed
-FROM node:20-alpine AS deps
-RUN apk add --no-cache libc6-compat
+# Build stage
+FROM node:20-alpine AS builder
+
 WORKDIR /app
 
 COPY package*.json ./
 RUN npm ci
 
-# Stage 2: Rebuild the source code only when needed
-FROM node:20-alpine AS builder
-WORKDIR /app
-COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
 ARG NEXT_PUBLIC_API_URL=/api
@@ -17,25 +13,11 @@ ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
 
 RUN npm run build
 
-# Stage 3: Production runner
-FROM node:20-alpine AS runner
-WORKDIR /app
+# Serve static files
+FROM nginx:alpine
 
-ENV NODE_ENV=production
-ENV PORT=3000
-ENV HOSTNAME="0.0.0.0"
+COPY --from=builder /app/out /usr/share/nginx/html
 
-# Create a non-root user for security security purposes
-RUN addgroup --system --gid 1001 nodejs
-RUN adduser --system --uid 1002 nextjs
+EXPOSE 80
 
-# Copy public assets conditionally, and copy standalone build outputs
-COPY --from=builder /app/public* ./public
-COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
-COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
-
-USER nextjs
-
-EXPOSE 3000
-
-CMD ["node", "server.js"]
+CMD ["nginx", "-g", "daemon off;"]
