@@ -1,5 +1,6 @@
-# Stage 1: Install dependencies only when needed
-FROM node:20-alpine AS deps
+# Build stage
+FROM node:20-alpine AS build
+
 WORKDIR /app
 
 COPY package*.json ./
