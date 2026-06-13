@@ -1,6 +1,6 @@
-# Build stage
-FROM node:20-alpine AS build
-
+# Stage 1: Install dependencies only when needed
+FROM node:20-alpine AS deps
+RUN apk add --no-cache libc6-compat
 WORKDIR /app
 
 COPY package*.json ./
